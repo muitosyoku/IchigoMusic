@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ichigo.imserver.dao.SongMapper">
+
+    <resultMap id="BaseResultMap" type="com.ichigo.imserver.domain.Song" >
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <id column="singer_id" jdbcType="INTEGER" property="singerId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="introduction" jdbcType="VARCHAR" property="introduction"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="pic" jdbcType="VARCHAR" property="pic"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithBlobs" type="com.ichigo.imserver.domain.Song" extends="BaseResultMap">
+        <result column="lyrics" jdbcType="LONGNVARCHAR" property="lyrics"/>
+    </resultMap>
+
+    <sql id="Base_Column">
+        id,singer_id,name,introduction,create_time,update_time,pic,url
+    </sql>
+
+
+    <sql id="Blob_Column">
+        id,singer_id,name,introduction,create_time,update_time,pic,lyrics,url
+    </sql>
+
+    <!--trim实现动态sql-->
+    <!--插入歌曲-->
+    <insert id="insert" parameterType="com.ichigo.imserver.domain.Song">
+        insert into song
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="singerId != null">
+                singer_id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="introduction != null">
+                introduction,
+            </if>
+            create_time,update_time,
+            <if test="pic != null">
+                pic,
+            </if>
+            <if test="lyrics != null">
+                lyrics,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+        </trim>
+        <trim prefix=" value(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="singerId != null">
+                #{singerId},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="introduction != null">
+                #{introduction},
+            </if>
+            now(),now(),
+            <if test="pic != null">
+                #{pic},
+            </if>
+            <if test="lyrics != null">
+                #{lyrics},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+        </trim>
+    </insert>
+
+    <!--修改歌曲-->
+    <update id="update" parameterType="com.ichigo.imserver.domain.Song">
+        update song
+        <set>
+            <if test="singerId != null">
+                singer_id = #{singerId},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="introduction != null">
+                introduction = #{introduction},
+            </if>
+            update_time = now(),
+            <if test="pic != null">
+                pic = #{pic},
+            </if>
+            <if test="lyrics != null">
+                lyrics = #{lyrics},
+            </if>
+            <if test="url != null">
+                url = #{url},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--删除歌曲-->
+    <delete id="delete" parameterType="java.lang.Integer">
+        delete from song where id = #{id}
+    </delete>
+
+    <!--根据id查询歌曲-->
+    <select id="selectById" parameterType="java.lang.Integer" resultMap="ResultMapWithBlobs">
+        select
+            <include refid="Blob_Column"/>
+        from
+            song
+        where
+            id = #{id}
+    </select>
+
+    <!--查询所有歌曲-->
+    <select id="selectAllSong" resultMap="ResultMapWithBlobs">
+        select
+            <include refid="Blob_Column"/>
+        from
+            song
+    </select>
+
+
+    <!--根据歌手名模糊查询-->
+    <select id="selectByName" resultMap="ResultMapWithBlobs" parameterType="java.lang.String">
+        select
+            <include refid="Blob_Column"/>
+        from
+            song
+        where name like #{name}
+    </select>
+
+    <!--根据歌手性别查询-->
+    <select id="selectBySingerId" resultMap="ResultMapWithBlobs" parameterType="java.lang.Integer">
+        select
+            <include refid="Blob_Column"/>
+        from
+            song
+        where singer_id = #{singerId}
+    </select>
+</mapper>
